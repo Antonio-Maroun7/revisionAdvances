@@ -5,6 +5,7 @@ import ProductTable from "../components/ProductTable";
 
 import {
   getProducts,
+  getProductById,
   createProduct,
   updateProduct,
   deleteProduct,
@@ -25,7 +26,6 @@ const ProductsView = () => {
       setError("");
 
       const data = await getProducts();
-
       setProducts(data);
     } catch (error) {
       setError(error.message);
@@ -40,7 +40,6 @@ const ProductsView = () => {
     const loadInitialProducts = async () => {
       try {
         const data = await getProducts();
-
         if (!cancelled) {
           setProducts(data);
           setError("");
@@ -55,30 +54,21 @@ const ProductsView = () => {
         }
       }
     };
-
     loadInitialProducts();
-
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   const handleSave = async (product) => {
     try {
       setError("");
-
       if (selectedProduct) {
         await updateProduct(selectedProduct.id, product);
       } else {
         await createProduct(product);
       }
-
       setSelectedProduct(null);
-
       await loadProducts();
     } catch (error) {
       setError(error.message);
-
       throw error;
     }
   };
@@ -93,33 +83,26 @@ const ProductsView = () => {
     setSelectedProduct(null);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (productId) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this product?",
     );
-
     if (!confirmed) {
       return;
     }
-
     try {
       setError("");
-
-      await deleteProduct(id);
-
+      await deleteProduct(productId);
       setSelectedProduct(null);
-
       await loadProducts();
     } catch (error) {
       setError(error.message);
     }
   };
-
   return (
     <>
       <h1>Product Management</h1>
-
-      {error && <p>Error: {error}</p>}
+      {error && <p>Error:{error}</p>}
 
       <ProductForm
         key={selectedProduct?.id ?? "new"}
@@ -127,11 +110,9 @@ const ProductsView = () => {
         onSave={handleSave}
         onCancel={handleCancel}
       />
-
-      <h2>Products</h2>
-
+      <h2>Product List</h2>
       {loading ? (
-        <p>Loading products...</p>
+        <p>Loading...</p>
       ) : (
         <ProductTable
           products={products}
@@ -142,5 +123,4 @@ const ProductsView = () => {
     </>
   );
 };
-
 export default ProductsView;

@@ -28,7 +28,6 @@ const ProductForm = ({ selectedProduct, onSave, onCancel }) => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-
     setForm({
       ...form,
       [name]: value,
@@ -43,9 +42,7 @@ const ProductForm = ({ selectedProduct, onSave, onCancel }) => {
       price: Number(form.price),
       quantity: Number(form.quantity),
     };
-
     onSave(product);
-
     setForm({
       name: "",
       description: "",
@@ -56,13 +53,11 @@ const ProductForm = ({ selectedProduct, onSave, onCancel }) => {
 
   return (
     <>
-      <h2>{selectedProduct ? "Edit Product" : "Create Product"}</h2>
-
+      <h2>{selectedProduct ? "Update Product" : "Create Product"}</h2>
       <form onSubmit={handleSubmit}>
         <div>
           <label>Product Name:</label>
           <br />
-
           <input
             type="text"
             name="name"
@@ -70,11 +65,9 @@ const ProductForm = ({ selectedProduct, onSave, onCancel }) => {
             onChange={handleChange}
           />
         </div>
-
         <div>
           <label>Product Description:</label>
           <br />
-
           <input
             type="text"
             name="description"
@@ -82,11 +75,9 @@ const ProductForm = ({ selectedProduct, onSave, onCancel }) => {
             onChange={handleChange}
           />
         </div>
-
         <div>
           <label>Product Price:</label>
           <br />
-
           <input
             type="number"
             name="price"
@@ -94,11 +85,9 @@ const ProductForm = ({ selectedProduct, onSave, onCancel }) => {
             onChange={handleChange}
           />
         </div>
-
         <div>
           <label>Product Quantity:</label>
           <br />
-
           <input
             type="number"
             name="quantity"
@@ -106,13 +95,9 @@ const ProductForm = ({ selectedProduct, onSave, onCancel }) => {
             onChange={handleChange}
           />
         </div>
-
         <br />
 
-        <button type="submit">
-          {selectedProduct ? "Update Product" : "Create Product"}
-        </button>
-
+        <button type="submit">{selectedProduct ? "Update" : "Create"}</button>
         {selectedProduct && (
           <button type="button" onClick={onCancel}>
             Cancel
@@ -122,5 +107,4 @@ const ProductForm = ({ selectedProduct, onSave, onCancel }) => {
     </>
   );
 };
-
 export default ProductForm;
