@@ -19,69 +19,67 @@ const toConflict = (error) => {
 };
 
 // ids that can't exist in a SERIAL column would otherwise make postgres throw a 500
-const isValidId = (id) =>{
-    const number = Number(id);
-    return Number.isInteger(number) && number > 0 && number <= 2147483647;
+const isValidId = (id) => {
+  const number = Number(id);
+  return Number.isInteger(number) && number > 0 && number <= 2147483647;
 };
 
-const createCategory = async (category) =>{ 
-    try{
-        return await categoryRepository.createCategory(category);
-    }catch(error){
-        throw toConflict(error);
-    }
+const createCategory = async (category) => {
+  try {
+    return await categoryRepository.createCategory(category);
+  } catch (error) {
+    throw toConflict(error);
+  }
 };
 
-const getAllCategories = async () =>{
-    return await categoryRepository.findAll();
+const getAllCategories = async () => {
+  return await categoryRepository.findAll();
 };
 
-const getCategoryById = async (id) =>{
-    if(!isValidId(id)){
-      throw notFound();
-    }
+const getCategoryById = async (id) => {
+  if (!isValidId(id)) {
+    throw notFound();
+  }
 
-    const category = await categoryRepository.findById(id);
-    if(!category){
-        throw notFound();
-    }
-    return category;
+  const category = await categoryRepository.findById(id);
+  if (!category) {
+    throw notFound();
+  }
+  return category;
 };
 
-const UpdateCategory = async (id,category){
-    if(isValidId(id)){
-        throw notFound();
-    }
-    let updatedCategory;
-    try{
-         updatedCategory = await categoryRepository.UpdateCategory(id,category);
-    }catch(error){
-        throw toConflict(error);
-    }
+const updateCategory = async (id, category) => {
+  if (!isValidId(id)) {
+    throw notFound();
+  }
+  let updatedCategory;
+  try {
+    updatedCategory = await categoryRepository.updateCategory(id, category);
+  } catch (error) {
+    throw toConflict(error);
+  }
 
-    if(!updatedCategory){
-        throw notFound();
-    }
-    return updatedCategory;
-   
+  if (!updatedCategory) {
+    throw notFound();
+  }
+  return updatedCategory;
+};
 
-}
+const deleteCategory = async (id) => {
+  if (!isValidId(id)) {
+    throw notFound();
+  }
+  const deletedCategory = await categoryRepository.deleteCategory(id);
+  if (!deletedCategory) {
+    throw notFound();
+  }
+  return deletedCategory;
+};
 
-const deleteCategory = async (id) =>{
-    if(isValidId(id)){
-        throw notFound();
-    }
-    const deletedCategory = await categoryRepository.deleteCategory(id);
-    if(!deleteCategory){
-        throw notFound();
-    }
-    return deleteCategory;
-}
-
-module.exports={
-    createCategory,
-    getAllCategories,
-    getCategoryById,
-    UpdateCategory,
-    deleteCategory,
-}
+module.exports = {
+  createCategory,
+  getAllCategories,
+  getCategoryById,
+  updateCategory,
+  deleteCategory,
+};
