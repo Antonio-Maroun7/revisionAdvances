@@ -7,7 +7,7 @@ import {
   createProduct,
   updateProduct,
 } from "../services/productService";
-import { getCategories } from "../services/categoryService";
+import { getAllCategories } from "../services/categoriesService";
 
 const ProductFormView = () => {
   const { id } = useParams();
@@ -25,7 +25,7 @@ const ProductFormView = () => {
     const loadData = async () => {
       try {
         const [categoriesData, productData] = await Promise.all([
-          getCategories(),
+          getAllCategories(),
           isEdit ? getProductById(id) : null,
         ]);
 

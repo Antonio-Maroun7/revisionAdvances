@@ -15,7 +15,7 @@ function App() {
       <AppNavbar />
       <Container className="pb-5">
         <Routes>
-          <Route path="/" element={<UsersView />} />
+          <Route path="/users" element={<UsersView />} />
           <Route path="/users/new" element={<UserFormView />} />
           <Route path="/users/:id" element={<UserFormView />} />
           <Route path="/products" element={<ProductsView />} />

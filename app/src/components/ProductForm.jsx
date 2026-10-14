@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { Form, Row, Col, InputGroup, Button } from "react-bootstrap";
+import Dropdown from "../components/Dropdown";
 
 const getFormFromProduct = (product) => ({
   name: product?.name ?? "",
@@ -95,9 +97,9 @@ const ProductForm = ({ selectedProduct, categories, onSave, onCancel }) => {
         </Row>
         <Form.Group className="mb-3" controlId="categoryId">
           <Form.Label>Category:</Form.Label>
-          <DropDown
+          <Dropdown
             name="categoryId"
-            values={form.categoryId}
+            value={form.categoryId}
             onChange={handleChange}
             options={categories}
             placeholder="-- No category --"

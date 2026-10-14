@@ -6,7 +6,7 @@ import {
   getCategoryById,
   createCategory,
   updateCategory,
-} from "../services/categoryService";
+} from "../services/categoriesService";
 
 const CategoryFormView = () => {
   const { id } = useParams();

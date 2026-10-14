@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Button, Card, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import UsersTable from "../components/UsersTable";
+import UsersTable from "../components/UserTable";
 import { getUsers, deleteUser } from "../services/userServices";
 
 const UsersView = () => {

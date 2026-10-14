@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Button, Card, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import CategoriesTable from "../components/CategoriesTable";
-import { getCategories, deleteCategory } from "../services/categoryService";
+import CategoryTable from "../components/CategoryTable";
+import {
+  getAllCategories,
+  deleteCategory,
+} from "../services/categoriesService";
 
 const CategoriesView = () => {
   const navigate = useNavigate();
@@ -14,7 +17,7 @@ const CategoriesView = () => {
     try {
       setLoading(true);
       setError("");
-      const data = await getCategories();
+      const data = await getAllCategories();
       setCategories(data);
     } catch (error) {
       setError(error.message);
@@ -28,7 +31,7 @@ const CategoriesView = () => {
 
     const loadInitialCategories = async () => {
       try {
-        const data = await getCategories();
+        const data = await getAllCategories();
         if (!cancelled) {
           setCategories(data);
           setError("");
@@ -94,7 +97,7 @@ const CategoriesView = () => {
             Loading categories...
           </div>
         ) : (
-          <CategoriesTable categories={categories} onDelete={handleDelete} />
+          <CategoryTable categories={categories} onDelete={handleDelete} />
         )}
       </Card>
     </>

@@ -1,3 +1,4 @@
+
 import { Form } from "react-bootstrap";
 
 const Dropdown = ({
@@ -18,11 +19,17 @@ const Dropdown = ({
       required={required}
     >
       <option value="">{placeholder}</option>
+
       {options.map((option) => (
-        <option key={option[valueKey]} value={option[valueKey]}>
+        <option
+          key={option[valueKey]}
+          value={option[valueKey]}
+        >
           {option[labelKey]}
         </option>
       ))}
     </Form.Select>
   );
 };
+
+export default Dropdown;
