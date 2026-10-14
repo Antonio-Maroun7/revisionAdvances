@@ -1,5 +1,5 @@
-const API_URL = "http://localhost:3000/api/products";
-
+const API_URL = `${import.meta.env.VITE_API_URL}/products`;
+import handleResponse from "./handleResponse";
 const handleResponse = async (response) => {
   if (!response.ok) {
     let errorData;

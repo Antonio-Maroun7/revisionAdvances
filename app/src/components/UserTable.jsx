@@ -1,129 +1,59 @@
-import { useState, useEffect } from "react";
+import { Button, Table } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
-const UserTable = () => {
-  const [users, setUsers] = useState([]);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [age, setAge] = useState("");
+const UsersTable = ({ users, onDelete }) => {
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    fillDummyUsers();
-  }, []);
-
-  const fillDummyUsers = () => {
-    let arr = [];
-    for (let i = 0; i < 10; i++) {
-      arr.push({
-        id: i,
-        firstName: `FN ${i}`,
-        lastName: `LN ${i}`,
-        age: 20 + i,
-      });
-    }
-    setUsers(arr);
-  };
-
-  const addUser = () => {
-    if (firstName === "" || lastName === "" || age === "") {
-      alert("All fields are required");
-      return;
-    }
-    const newUser = {
-      id: Date.now(),
-      firstName: firstName,
-      lastName: lastName,
-      age: age,
-    };
-    setUsers([...users, newUser]);
-  };
-
-  const deleteUser = (id) => {
-    setUsers(users.filter((user) => user.id !== id));
-  };
-
-  const updateUser = (id) => {
-    if (firstName === "" || lastName === "" || age === "") {
-      alert("All fields are required");
-      return;
-    }
-
-    const updatedUser = users.map((user) => {
-      if (user.id === id) {
-        return {
-          ...user,
-          firstName: firstName,
-          lastName: lastName,
-          age: age,
-        };
-      }
-      return user;
-    });
-    setUsers(updatedUser);
-  };
+  if (users.length === 0) {
+    return (
+      <p className="text-center text-body-secondary py-5 mb-0">
+        No users found
+      </p>
+    );
+  }
 
   return (
-    <>
-      <input
-        type="text"
-        placeholder="First Name"
-        value={firstName}
-        onChange={(e) => setFirstName(e.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="Last Name"
-        value={lastName}
-        onChange={(e) => setLastName(e.target.value)}
-      />
-      <input
-        type="number"
-        placeholder="Age"
-        value={age}
-        onChange={(e) => setAge(e.target.value)}
-      />
-      <button className="btn btn-primary" onClick={addUser}>
-        Add User
-      </button>
-      <table className="table">
-        <thead>
-          <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Age</th>
-            <th>Update</th>
-            <th>Delete</th>
+    <Table hover responsive className="mb-0">
+      <thead className="table-light">
+        <tr>
+          <th>ID</th>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Email</th>
+          <th>Age</th>
+          <th className="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {users.map((user) => (
+          <tr key={user.id}>
+            <td className="text-body-secondary">{user.id}</td>
+            <td>{user.firstName}</td>
+            <td>{user.lastName}</td>
+            <td>{user.email}</td>
+            <td>{user.age}</td>
+            <td className="text-end text-nowrap">
+              <Button
+                size="sm"
+                variant="outline-primary"
+                className="me-2"
+                onClick={() => navigate(`/users/${user.id}/edit`)}
+              >
+                Edit
+              </Button>
+              <Button
+                size="sm"
+                variant="outline-danger"
+                onClick={() => onDelete(user.id)}
+              >
+                Delete
+              </Button>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => {
-            return (
-              <tr key={user.id}>
-                <td>{user.firstName}</td>
-                <td>{user.lastName}</td>
-                <td>{user.age}</td>
-                <td>
-                  <button
-                    className="btn btn-secondary"
-                    onClick={() => updateUser(user.id)}
-                  >
-                    Update
-                  </button>
-                </td>
-                <td>
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => deleteUser(user.id)}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </>
+        ))}
+      </tbody>
+    </Table>
   );
 };
 
-export default UserTable;
+export default UsersTable;

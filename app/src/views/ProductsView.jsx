@@ -12,13 +12,13 @@ import {
 } from "../services/productServices";
 
 const ProductsView = () => {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState([]); // State to hold the list of products
 
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null); // State to hold the currently selected product for editing
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // State to indicate if the products are being loaded
 
-  const [error, setError] = useState("");
+  const [error, setError] = useState(""); // State to hold any error messagesx
 
   const loadProducts = useCallback(async () => {
     try {

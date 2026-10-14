@@ -1,111 +1,107 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { Button, Col, Form, Row } from "react-bootstrap";
 
-const UserForm = (selectedUser, onSave, onCancel) => {
-  // User form component
-  const [form, setForm] = useState({
+const getEmptyForm = () => ({
     firstName: "",
     lastName: "",
     email: "",
-    age: "",
-  });
+    age: ""
+});
 
-  useEffect(() => {
-    if (selectedUser) {
-      setForm({
-        firstName: selectedUser.firstName,
-        lastName: selectedUser.lastName,
-        email: selectedUser.email,
-        age: selectedUser.age,
-      });
-    } else {
-      setForm({
-        firstName: "",
-        lastName: "",
-        email: "",
-        age: "",
-      });
+const getFormFromUser = (user) => {
+    if (!user) {
+        return getEmptyForm();
     }
-  }, [selectedUser]); // Update form when selectedUser changes
 
-  const handleChange = (event) => {
-    // Handle form input changes
-    event.preventDefault();
-    const { name, value } = event.target;
-
-    setForm({
-      ...form,
-      [name]: value,
-    });
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const user = {
-      ...form,
-      age: form.age === "" ? null : Number(form.age),
+    return {
+        firstName: user.firstName ?? "",
+        lastName: user.lastName ?? "",
+        email: user.email ?? "",
+        age: user.age ?? ""
     };
-    onSave(user);
-  };
-  return (
-    <>
-      <h2>{selectedUser ? "Edit User" : "Create User"}</h2>
-      <div>
-        <label>First Name:</label>
-        <br />
-        <input
-          type="text"
-          name="firstName"
-          value={form.firstName}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <br />
-      <div>
-        <label>Last Name:</label>
-        <br />
-        <input
-          type="text"
-          name="lastName"
-          value={form.lastName}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <br />
-      <div>
-        <label>Email :</label>
-        <br />
-        <input
-          type="email"
-          name="email"
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <br />
-      <div>
-        <label>Age:</label>
-        <br />
-        <input
-          type="number"
-          name="age"
-          value={form.age}
-          onChange={handleChange}
-        />
-      </div>
-      <br />
-      <button type="submit">
-        {selectedUser ? "Update User" : "Create User"}
-      </button>
-      {selectedUser && (
-        <button type="button" onClick={onCancel}>
-          Cancel
-        </button>
-      )}
-    </>
-  );
-};
+}
+
+const UserForm = ({ selectedUser, onSave, onCancel }) => {
+
+    const [form, setForm] = useState(() => getFormFromUser(selectedUser));
+
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+
+        setForm({
+            ...form,
+            [name]: value
+        })
+    }
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        const user = {
+            ...form,
+            age: form.age === "" ? null : Number(form.age)
+        }
+        
+        await onSave(user);
+    }
+    return (
+        <Form onSubmit={handleSubmit}>
+            <Row className="g-3 mb-3">
+                <Form.Group as={Col} sm={6} controlId="firstName">
+                    <Form.Label>First Name</Form.Label>
+                    <Form.Control
+                        type="text"
+                        name="firstName"
+                        value={form.firstName}
+                        onChange={handleChange}
+                        required
+                    />
+                </Form.Group>
+                <Form.Group as={Col} sm={6} controlId="lastName">
+                    <Form.Label>Last Name</Form.Label>
+                    <Form.Control
+                        type="text"
+                        name="lastName"
+                        value={form.lastName}
+                        onChange={handleChange}
+                        required
+                    />
+                </Form.Group>
+            </Row>
+            <Form.Group className="mb-3" controlId="email">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                    type="email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    required
+                />
+            </Form.Group>
+            <Form.Group controlId="age">
+                <Form.Label>Age</Form.Label>
+                <Form.Control
+                    type="number"
+                    name="age"
+                    min="0"
+                    max="150"
+                    step="1"
+                    value={form.age}
+                    onChange={handleChange}
+                />
+            </Form.Group>
+
+            <div className="d-flex justify-content-end gap-2 mt-4">
+                <Button variant="outline-secondary" onClick={onCancel} type="button">
+                    Cancel
+                </Button>
+                <Button variant="primary" type="submit">
+                    {
+                        selectedUser ? "Update User" : "Create User"
+                    }
+                </Button>
+            </div>
+        </Form>
+    )
+}
 
 export default UserForm;
