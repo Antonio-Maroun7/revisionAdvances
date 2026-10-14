@@ -54,7 +54,7 @@ const updateCategory = async (id, category) => {
   }
   let updatedCategory;
   try {
-    updatedCategory = await categoryRepository.updateCategory(id, category);
+    updatedCategory = await categoryRepository.UpdateCategory(id, category);
   } catch (error) {
     throw toConflict(error);
   }
@@ -69,7 +69,7 @@ const deleteCategory = async (id) => {
   if (!isValidId(id)) {
     throw notFound();
   }
-  const deletedCategory = await categoryRepository.deleteCategory(id);
+  const deletedCategory = await categoryRepository.removeCategory(id);
   if (!deletedCategory) {
     throw notFound();
   }

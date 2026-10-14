@@ -1,6 +1,6 @@
 const pool = require("../config/db");
 
-const categoryColumns = `id,name,description,isActive AS "isActive",created_at AS "createdAt"`;
+const categoryColumns = `id,name,description,is_active AS "isActive",created_at AS "createdAt"`;
 
 const findAll = async () => {
   const result = await pool.query(
@@ -24,7 +24,7 @@ const createCategory = async (category) => {
   const { name, description, isActive } = category;
   const result = await pool.query(
     `INSERT INTO categories 
-        (name,description,isActive,created_at) 
+        (name,description,is_active,created_at) 
         values ($1,$2,$3,CURRENT_TIMESTAMP)
         RETURNING ${categoryColumns}`,
     [name, description, isActive],
@@ -38,9 +38,9 @@ const UpdateCategory = async (id, category) => {
     `UPDATE categories
         SET name = $1,
             description = $2,
-            isActive = $3
+            is_active = $3
             WHERE id = $4
-            RETURNING${categoryColumns}`,
+            RETURNING ${categoryColumns}`,
     [name, description, isActive, id],
   );
   return result.rows[0];
@@ -50,7 +50,7 @@ const removeCategory = async (id) => {
   const result = await pool.query(
     `DELETE FROM categories
         WHERE id=$1
-        RETURNING${categoryColumns}`,
+        RETURNING ${categoryColumns}`,
     [id],
   );
   return result.rows[0];
