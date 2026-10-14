@@ -9,7 +9,7 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
-} from "../services/productServices";
+} from "../services/productService";
 
 const ProductsView = () => {
   const [products, setProducts] = useState([]); // State to hold the list of products

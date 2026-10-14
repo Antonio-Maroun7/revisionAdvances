@@ -1,5 +1,5 @@
 import ProductsView from "./views/ProductsView";
-import ProductView from "./views/ProductView";
+
 import UsersView from "./views/UsersView";
 import UserFormView from "./views/UsersForm";
 import AppNavbar from "./components/AppNavBar";
