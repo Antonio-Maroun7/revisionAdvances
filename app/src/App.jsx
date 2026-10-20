@@ -8,6 +8,8 @@ import { Routes, Route } from "react-router-dom";
 import ProductFormView from "./views/ProductsFormView";
 import CategoriesView from "./views/CategoriesView";
 import CategoryFormView from "./views/CategoriesFormView";
+import OrdersView from "./views/OrdersView";
+import OrderFormView from "./views/OrderFormView";
 
 function App() {
   return (
@@ -25,6 +27,10 @@ function App() {
           <Route path="/categories/new" element={<CategoryFormView />} />
           <Route path="/categories/:id/edit" element={<CategoryFormView />} />
           <Route path="/categories/:id" element={<CategoryFormView />} />
+          <Route path="/orders" element={<OrdersView />} />
+          <Route path="/orders/new" element={<OrderFormView />} />
+          <Route path="/orders/:id/edit" element={<OrderFormView />} />
+          <Route path="/orders/:id" element={<OrderFormView />} />
         </Routes>
       </Container>
     </>

@@ -26,6 +26,9 @@ const AppNavbar = () => {
             <Nav.Link as={NavLink} to="/categories">
               Categories
             </Nav.Link>
+            <Nav.Link as={NavLink} to="/orders">
+              Orders
+            </Nav.Link>
             <Nav.Link as={NavLink} to="/ContactUs">
               Contact Us
             </Nav.Link>
