@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Button, Form } from "react-bootstrap";
+import { Alert, Button, Form } from "react-bootstrap";
+import useForm from "../hooks/useForm";
 
 const getFormFromCategory = (category) => ({
   name: category?.name ?? "",
@@ -8,24 +8,15 @@ const getFormFromCategory = (category) => ({
 });
 
 const CategoryForm = ({ selectedCategory, onSave, onCancel }) => {
-  const [form, setForm] = useState(() => getFormFromCategory(selectedCategory));
-
-  const handleChange = (event) => {
-    const { name, value, type, checked } = event.target;
-
-    setForm({
-      ...form,
-      [name]: type === "checkbox" ? checked : value,
-    });
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    await onSave(form);
-  };
-
+  const { values: form, handleChange, handleSubmit, loading, error, setError } =
+    useForm(getFormFromCategory(selectedCategory), onSave);
   return (
     <Form onSubmit={handleSubmit}>
+      {error && (
+        <Alert variant="danger" dismissible onClose={() => setError("")}>
+          {error}
+        </Alert>
+      )}
       <Form.Group className="mb-3" controlId="name">
         <Form.Label>Name</Form.Label>
         <Form.Control
@@ -57,10 +48,10 @@ const CategoryForm = ({ selectedCategory, onSave, onCancel }) => {
       />
 
       <div className="d-flex justify-content-end gap-2 mt-4">
-        <Button variant="outline-secondary" onClick={onCancel} type="button">
+        <Button variant="outline-secondary" onClick={onCancel} type="button" disabled={loading}>
           Cancel
         </Button>
-        <Button variant="primary" type="submit">
+        <Button variant="primary" type="submit" disabled={loading}>
           {selectedCategory ? "Update Category" : "Create Category"}
         </Button>
       </div>

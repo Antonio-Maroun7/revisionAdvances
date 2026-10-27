@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
-import { Form, Row, Col, InputGroup, Button } from "react-bootstrap";
+import { useEffect } from "react";
+import { Form, Row, Col, InputGroup, Button, Alert } from "react-bootstrap";
 import Dropdown from "../components/Dropdown";
+import useForm from "../hooks/useForm";
 
 const getFormFromProduct = (product) => ({
   name: product?.name ?? "",
@@ -11,38 +12,30 @@ const getFormFromProduct = (product) => ({
 });
 
 const ProductForm = ({ selectedProduct, categories, onSave, onCancel }) => {
-  const [form, setForm] = useState(() => getFormFromProduct(selectedProduct));
-
-  useEffect(() => {
-    if (selectedProduct) {
-      setForm(getFormFromProduct(selectedProduct));
-    } else {
-      setForm(getFormFromProduct(null));
-    }
-  }, [selectedProduct]);
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setForm({
-      ...form,
-      [name]: value,
+  // Convert the text inputs to the types expected by the API before saving.
+  const saveProduct = (formValues) =>
+    onSave({
+      ...formValues,
+      price: Number(formValues.price),
+      quantity: formValues.quantity === "" ? 0 : Number(formValues.quantity),
+      categoryId:
+        formValues.categoryId === "" ? null : Number(formValues.categoryId),
     });
-  };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const product = {
-      ...form,
-      price: Number(form.price),
-      quantity: form.quantity === "" ? 0 : Number(form.quantity),
-      categoryId: form.categoryId === "" ? null : Number(form.categoryId),
-    };
+  const { values: form, handleChange, handleSubmit, resetForm, loading, error, setError } =
+    useForm(getFormFromProduct(selectedProduct), saveProduct);
 
-    await onSave(product);
-  };
-
+  // Refill the form when switching between Create and Edit (or between records).
+  useEffect(() => {
+    resetForm(getFormFromProduct(selectedProduct));
+  }, [selectedProduct, resetForm]);
   return (
     <>
+      {error && (
+        <Alert variant="danger" dismissible onClose={() => setError("")}>
+          {error}
+        </Alert>
+      )}
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3" controlId="name">
           <Form.Label>Product Name:</Form.Label>
@@ -106,10 +99,10 @@ const ProductForm = ({ selectedProduct, categories, onSave, onCancel }) => {
           />
         </Form.Group>
         <div className="d-flex justify-content-end gap-2 mt-4">
-          <Button variant="Outline-secondary" onClick={onCancel} type="button">
+          <Button variant="Outline-secondary" onClick={onCancel} type="button" disabled={loading}>
             Cancel
           </Button>
-          <Button variant="primary" type="submit">
+          <Button variant="primary" type="submit" disabled={loading}>
             {selectedProduct ? "Update Product" : "Create Product"}
           </Button>
         </div>

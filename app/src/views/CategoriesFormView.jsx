@@ -49,19 +49,15 @@ const CategoryFormView = () => {
     };
   }, [id, isEdit]);
 
+  // Errors propagate to the form (useForm), which displays them.
   const handleSave = async (data) => {
-    try {
-      setError("");
-      if (isEdit) {
-        await updateCategory(id, data);
-      } else {
-        await createCategory(data);
-      }
-
-      navigate("/categories");
-    } catch (error) {
-      setError(error.message);
+    if (isEdit) {
+      await updateCategory(id, data);
+    } else {
+      await createCategory(data);
     }
+
+    navigate("/categories");
   };
 
   const handleCancel = () => {

@@ -52,19 +52,15 @@ const ProductFormView = () => {
     };
   }, [id, isEdit]);
 
+  // Errors propagate to the form (useForm), which displays them.
   const handleSave = async (data) => {
-    try {
-      setError("");
-      if (isEdit) {
-        await updateProduct(id, data);
-      } else {
-        await createProduct(data);
-      }
-
-      navigate("/products");
-    } catch (error) {
-      setError(error.message);
+    if (isEdit) {
+      await updateProduct(id, data);
+    } else {
+      await createProduct(data);
     }
+
+    navigate("/products");
   };
 
   const handleCancel = () => {
