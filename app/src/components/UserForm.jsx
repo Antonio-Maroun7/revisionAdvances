@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Button, Col, Form, Row } from "react-bootstrap";
+import { useEffect } from "react";
+import { Alert, Button, Col, Form, Row } from "react-bootstrap";
+import useForm from "../hooks/useForm";
 
 const getEmptyForm = () => ({
     firstName: "",
@@ -22,29 +23,27 @@ const getFormFromUser = (user) => {
 }
 
 const UserForm = ({ selectedUser, onSave, onCancel }) => {
+    // Convert age to a number (or null) before handing the data to onSave.
+    const saveUser = (formValues) =>
+        onSave({
+            ...formValues,
+            age: formValues.age === "" ? null : Number(formValues.age)
+        });
 
-    const [form, setForm] = useState(() => getFormFromUser(selectedUser));
+    const { values: form, handleChange, handleSubmit, resetForm, loading, error, setError } =
+        useForm(getFormFromUser(selectedUser), saveUser);
 
-    const handleChange = (event) => {
-        const { name, value } = event.target;
-
-        setForm({
-            ...form,
-            [name]: value
-        })
-    }
-
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        const user = {
-            ...form,
-            age: form.age === "" ? null : Number(form.age)
-        }
-        
-        await onSave(user);
-    }
+    // Refill the form when the selected user changes (Create <-> Edit).
+    useEffect(() => {
+        resetForm(getFormFromUser(selectedUser));
+    }, [selectedUser, resetForm]);
     return (
         <Form onSubmit={handleSubmit}>
+            {error && (
+                <Alert variant="danger" dismissible onClose={() => setError("")}>
+                    {error}
+                </Alert>
+            )}
             <Row className="g-3 mb-3">
                 <Form.Group as={Col} sm={6} controlId="firstName">
                     <Form.Label>First Name</Form.Label>
@@ -91,10 +90,10 @@ const UserForm = ({ selectedUser, onSave, onCancel }) => {
             </Form.Group>
 
             <div className="d-flex justify-content-end gap-2 mt-4">
-                <Button variant="outline-secondary" onClick={onCancel} type="button">
+                <Button variant="outline-secondary" onClick={onCancel} type="button" disabled={loading}>
                     Cancel
                 </Button>
-                <Button variant="primary" type="submit">
+                <Button variant="primary" type="submit" disabled={loading}>
                     {
                         selectedUser ? "Update User" : "Create User"
                     }

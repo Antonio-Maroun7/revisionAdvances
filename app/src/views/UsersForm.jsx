@@ -45,19 +45,15 @@ const UserFormView = () => {
     };
   }, [id, isEdit]);
 
+  // Errors propagate to the form (useForm), which displays them.
   const handleSave = async (data) => {
-    try {
-      setError("");
-      if (isEdit) {
-        await updateUser(id, data);
-      } else {
-        await createUser(data);
-      }
-
-      navigate("/users");
-    } catch (error) {
-      setError(error.message);
+    if (isEdit) {
+      await updateUser(id, data);
+    } else {
+      await createUser(data);
     }
+
+    navigate("/users");
   };
 
   const handleCancel = () => {
