@@ -1,135 +1,96 @@
 import { Injectable } from '@nestjs/common';
-import { DatabaseService } from '../database/database.module.js';
+import { InjectModel } from '@nestjs/sequelize';
+import { col, fn, where } from 'sequelize';
+import { Sequelize } from 'sequelize-typescript';
+import { Role } from '../roles/role.model.js';
+import { UserRole } from '../roles/user-role.model.js';
 import { UserDto } from './dto/user.dto.js';
+import { User } from './user.model.js';
 
-export interface NewUser {
-  firstName: string;
-  lastName: string;
-  email: string;
-  age?: number | null;
-}
+// the user's roles as [{ id, name }], sorted by name
+const withRoles = {
+  include: [
+    { model: Role, attributes: ['id', 'name'], through: { attributes: [] } },
+  ],
+  order: [
+    ['id', 'ASC'],
+    [{ model: Role, as: 'roles' }, 'name', 'ASC'],
+  ] as never,
+};
 
-const userColumns = `
-  id,
-  first_name AS "firstName",
-  last_name AS "lastName",
-  email,
-  age,
-  created_at AS "createdAt"
-`;
+const toUserRow = (user: UserDto) => ({
+  firstName: user.firstName,
+  lastName: user.lastName,
+  email: user.email,
+  age: user.age,
+});
 
-const userRoles = `
-  (SELECT COALESCE(
-    json_agg(
-      json_build_object('id', roles.id, 'name', roles.name)
-      ORDER BY roles.name
-    ), '[]')
-   FROM user_roles
-   JOIN roles ON roles.id = user_roles.role_id
-   WHERE user_roles.user_id = users.id) AS roles
-`;
-
-@Injectable()
-export class UsersRepository {
-  constructor(private readonly db: DatabaseService) {}
+@Injectable() // Marks the class as a provider that can be injected into other classes
+export class UserRepository {
+  constructor(
+    @InjectModel(User) private readonly userModel: typeof User, // User model for database operations
+    @InjectModel(Role) private readonly roleModel: typeof Role, // Role model for database operations
+    @InjectModel(UserRole) private readonly userRoleModel: typeof UserRole, // UserRole model for database operations
+    private readonly sequelize: Sequelize, // Sequelize instance for raw queries and transactions
+  ) {}
 
   async findAll() {
-    const result = await this.db.query(
-      `SELECT ${userColumns}, ${userRoles}
-       FROM users ORDER BY id`,
-    );
-    return result.rows;
+    const users = await this.userModel.findAll(withRoles);
+    return users.map((user) => user.get({ plain: true })); // Convert each user instance to a plain object
   }
 
   async findById(id: number) {
-    const result = await this.db.query(
-      `SELECT ${userColumns}, ${userRoles}
-       FROM users WHERE id = $1`,
-      [id],
-    );
-    return result.rows[0];
-  }
-
-  // Used by AuthService during login
-  async findByEmailWithPassword(email: string) {
-    const result = await this.db.query(
-      `SELECT ${userColumns},
-              password_hash AS "passwordHash"
-       FROM users
-       WHERE lower(email) = lower($1)`,
-      [email],
-    );
-    return result.rows[0];
-  }
-
-  // Used by AuthService during registration
-  async createWithPassword(user: NewUser, passwordHash: string) {
-    const result = await this.db.query(
-      `WITH new_user AS (
-         INSERT INTO users
-           (first_name, last_name, email, age, password_hash)
-         VALUES ($1, $2, $3, $4, $5)
-         RETURNING ${userColumns}
-       ), default_role AS (
-         INSERT INTO user_roles (user_id, role_id)
-         SELECT new_user.id, roles.id
-         FROM new_user JOIN roles ON roles.is_default
-       )
-       SELECT * FROM new_user`,
-      [
-        user.firstName,
-        user.lastName,
-        user.email,
-        user.age ?? null,
-        passwordHash,
-      ],
-    );
-    return result.rows[0];
+    const user = await this.userModel.findOne({ where: { id }, ...withRoles });
+    return user?.get({ plain: true }); // Convert the user instance to a plain object
   }
 
   async create(user: UserDto) {
-    const result = await this.db.query<{ id: number }>(
-      `WITH new_user AS (
-         INSERT INTO users
-           (first_name, last_name, email, age)
-         VALUES ($1, $2, $3, $4)
-         RETURNING id
-       ), default_role AS (
-         INSERT INTO user_roles (user_id, role_id)
-         SELECT new_user.id, roles.id
-         FROM new_user JOIN roles ON roles.is_default
-       )
-       SELECT id FROM new_user`,
-      [user.firstName, user.lastName, user.email, user.age ?? null],
-    );
-
-    return this.findById(result.rows[0].id);
+    const created = await this.userModel.create(toUserRow(user));
+    return this.findById(created.id);
   }
 
-  async update(id: number, user: UserDto) {
-    const result = await this.db.query<{ id: number }>(
-      `UPDATE users
-       SET first_name = $1,
-           last_name = $2,
-           email = $3,
-           age = $4
-       WHERE id = $5
-       RETURNING id`,
-      [user.firstName, user.lastName, user.email, user.age ?? null, id],
-    );
-
-    if (!result.rows[0]) return undefined;
+  // registered accounts also get the default role, in one transaction
+  async createWithPassword(user: UserDto, passwordHash: string) {
+    const id = await this.sequelize.transaction(async (transaction) => {
+      const created = await this.userModel.create(
+        { ...toUserRow(user), passwordHash },
+        { transaction },
+      );
+      const defaultRole = await this.roleModel.findOne({
+        where: { isDefault: true },
+        transaction,
+      });
+      if (defaultRole) {
+        await this.userRoleModel.create(
+          { userId: created.id, roleId: defaultRole.id },
+          { transaction },
+        );
+      }
+      return created.id;
+    });
     return this.findById(id);
   }
 
-  async remove(id: number) {
-    const result = await this.db.query(
-      `DELETE FROM users
-       WHERE id = $1
-       RETURNING id`,
-      [id],
-    );
+  // the only query that returns the hash; never send its result to the client as-is
+  async findByEmailWithPassword(email: string) {
+    const user = await this.userModel.scope('withPassword').findOne({
+      where: where(fn('lower', col('email')), email.toLowerCase()),
+    });
+    return user?.get({ plain: true });
+  }
 
-    return result.rows[0];
+  async remove(id: number) {
+    return (await this.userModel.destroy({ where: { id } })) > 0;
+  }
+
+  // replaces all of the user's roles
+  async setRoles(userId: number, roleIds: number[]) {
+    await this.sequelize.transaction(async (transaction) => {
+      await this.userRoleModel.destroy({ where: { userId }, transaction });
+      await this.userRoleModel.bulkCreate(
+        roleIds.map((roleId) => ({ userId, roleId })),
+        { transaction },
+      );
+    });
   }
 }
