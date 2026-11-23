@@ -7,44 +7,56 @@ import {
   Param,
   Post,
   Put,
+  Req,
 } from '@nestjs/common';
+import type { AuthenticatedRequest } from '../common/authenticated-request.js';
 import { ParseIdPipe } from '../common/parse-id.pipe.js';
 import { RequirePermissions } from '../permissions/require-permissions.decorator.js';
+import { UserRolesDto } from './dto/user-roles.dto.js';
 import { UserDto } from './dto/user.dto.js';
 import { UsersService } from './users.service.js';
 
-@Controller('users')
+@Controller(`users`)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly userService: UsersService) {}
 
   @Get()
-  @RequirePermissions('users:read')
+  @RequirePermissions('users.read')
   findAll() {
-    return this.usersService.findAll();
+    return this.userService.findAll();
   }
 
-  @Get(':id')
-  @RequirePermissions('users:read')
-  findOne(@Param('id', ParseIdPipe) id: number) {
-    return this.usersService.findOne(id);
+  @Get(`:id`)
+  @RequirePermissions(`users.read`)
+  findOne(@Param(`id`, ParseIdPipe) id: number) {
+    return this.userService.findById(id);
   }
 
   @Post()
-  @RequirePermissions('users:create')
+  @RequirePermissions(`users.create`)
   create(@Body() user: UserDto) {
-    return this.usersService.create(user);
+    return this.userService.create(user);
+  }
+  @Put(`:id`)
+  @RequirePermissions(`users.update`)
+  update(@Param(`id`, ParseIdPipe) id: number, @Body() user: UserDto) {
+    return this.userService.update(id, user);
   }
 
-  @Put(':id')
-  @RequirePermissions('users:update')
-  update(@Param('id', ParseIdPipe) id: number, @Body() user: UserDto) {
-    return this.usersService.update(id, user);
-  }
-
-  @Delete(':id')
-  @RequirePermissions('users:delete')
+  @Delete(`:id`)
+  @RequirePermissions(`users.delete`)
   @HttpCode(204)
-  remove(@Param('id', ParseIdPipe) id: number) {
-    return this.usersService.remove(id);
+  remove(@Param(`id`, ParseIdPipe) id: number) {
+    return this.userService.remove(id);
+  }
+
+  @Put(`:id/roles`)
+  @RequirePermissions(`roles:manage`)
+  updateRoles(
+    @Param('id', ParseIdPipe) id: number,
+    @Body() body: UserRolesDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.userService.updateRoles(id, body.roleIds, request.userId);
   }
 }

@@ -26,7 +26,7 @@ const toUserRow = (user: UserDto) => ({
 });
 
 @Injectable() // Marks the class as a provider that can be injected into other classes
-export class UserRepository {
+export class UsersRepository {
   constructor(
     @InjectModel(User) private readonly userModel: typeof User, // User model for database operations
     @InjectModel(Role) private readonly roleModel: typeof Role, // Role model for database operations
@@ -77,6 +77,12 @@ export class UserRepository {
       where: where(fn('lower', col('email')), email.toLowerCase()),
     });
     return user?.get({ plain: true });
+  }
+  async update(id: number, user: UserDto) {
+    const [count] = await this.userModel.update(toUserRow(user), {
+      where: { id },
+    });
+    return count ? this.findById(id) : undefined;
   }
 
   async remove(id: number) {
