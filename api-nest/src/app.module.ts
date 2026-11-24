@@ -11,14 +11,15 @@ import { PermissionsModule } from './permissions/permissions.module.js';
 import { RolesModule } from './roles/roles.module.js';
 
 import { UsersModule } from './users/users.module.js';
+import { CategoriesModule } from './categories/categories.module.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
-
     PermissionsModule,
     UsersModule,
+    CategoriesModule,
     RolesModule,
   ],
   providers: [
