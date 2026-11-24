@@ -10,7 +10,7 @@ const toCategoryRow = (category: CategoryDto) => ({
 });
 
 @Injectable()
-export class CategoryRepository {
+export class CategoriesRepository {
   constructor(
     @InjectModel(Category) private readonly categoryModel: typeof Category,
   ) {}
